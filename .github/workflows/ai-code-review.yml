@@ -1,0 +1,32 @@
+# .github/workflows/ai-code-review.yml
+name: AI Code Review
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  review:
+    # Run only if comment is on a PR and starts with the trigger command
+    if: startsWith(github.event.comment.body, '/gemini-review') && github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    # Permissions needed by the action to read code and write comments
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+
+    steps:
+      - name: Run AI Review Bot Action
+        # Replace your-org/ai-review-bot-action with your actual org/repo name
+        # Replace @v1 with the specific tag/branch/commit SHA you want to use
+        uses: your-org/ai-review-bot-action@v1 
+        with:
+          # Pass the Gemini API key secret to the action
+          gemini-api-key: ${{ secrets.GEMINI_API_KEY }} # Or secrets.YOUR_ORG_SECRET_NAME
+          # Optional: Override the default config file path
+          # config-path: '.github/my-custom-review-config.yml'
+          # Optional: Override the default Gemini model
+          # gemini-model-name: 'gemini-pro'
+          # Optional: Pass a specific token if needed (defaults to github.token)
+          # github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
