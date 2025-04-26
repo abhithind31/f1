@@ -20,7 +20,7 @@ jobs:
       - name: Run AI Review Bot Action
         # Replace your-org/ai-review-bot-action with your actual org/repo name
         # Replace @v1 with the specific tag/branch/commit SHA you want to use
-        uses: abhithind31/ai-review-bot@v1
+        uses: abhithind31/ai-review-bot@v3
         with:
           # Pass the Gemini API key secret to the action
           gemini-api-key: ${{ secrets.GEMINI_API_KEY }} # Or secrets.YOUR_ORG_SECRET_NAME
