@@ -2,31 +2,90 @@
 name: AI Code Review
 
 on:
+  # Trigger only when a comment is created on an issue (which includes PRs)
   issue_comment:
     types: [created]
 
 jobs:
-  review:
-    # Run only if comment is on a PR and starts with the trigger command
-    if: startsWith(github.event.comment.body, '/gemini-review') && github.event.issue.pull_request
+  ai_review:
+    # Run this job only if:
+    # 1. The comment was made on a Pull Request.
+    # 2. The comment body starts with "/gemini-review".
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/gemini-review')
     runs-on: ubuntu-latest
-    # Permissions needed by the action to read code and write comments
+    # Permissions needed by the action or subsequent steps
     permissions:
-      contents: read
-      pull-requests: write
-      issues: read
+      contents: read          # To checkout code
+      pull-requests: write    # To post review comments
+      issues: read            # To read comment details
 
     steps:
-      - name: Run AI Review Bot Action
-        # Replace your-org/ai-review-bot-action with your actual org/repo name
-        # Replace @v1 with the specific tag/branch/commit SHA you want to use
-        uses: abhithind31/cursor@v1
+      # Step 1: Checkout the code of the pull request branch
+      # This makes the repository code available to the action.
+      - name: Checkout PR Code
+        uses: actions/checkout@v4
         with:
-          # Pass the Gemini API key secret to the action
-          gemini-api-key: ${{ secrets.GEMINI_API_KEY }} # Or secrets.YOUR_ORG_SECRET_NAME
-          # Optional: Override the default config file path
-          # config-path: '.github/my-custom-review-config.yml'
-          # Optional: Override the default Gemini model
+          # Check out the specific commit associated with the PR comment event
+          # This ensures the review runs on the code the comment refers to.
+          ref: ${{ github.event.issue.pull_request.head.sha }}
+
+      # Step 2: Run the AI Code Review Action
+      # Replace '<your-github-username-or-org>/<your-repo-name>@main' with the
+      # correct path to your action repository (e.g., your-org/ai-review-bot@v1.0.0 or @main)
+      # If you run this workflow within the *same* repository as the action code,
+      # you might use `uses: ./` (relative path) instead.
+      - name: Run AI Review Bot
+        uses: abhithind31/ai-review-bot@v3 # <-- IMPORTANT: Replace this!
+        with:
+          # Required: Pass the Gemini API Key stored as a secret in this repository
+          gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
+
+          # Optional: Specify a different path for the config file if needed
+          # config-path: '.github/custom-reviewer-config.yml'
+
+          # Optional: Specify a different Gemini model name
           # gemini-model-name: 'gemini-pro'
-          # Optional: Pass a specific token if needed (defaults to github.token)
-          # github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+
+          # Note: github-token defaults to ${{ github.token }} within the action,
+          # so you usually don't need to pass it explicitly unless required by specific logic.
+
+        # Environment variables needed by the Python script within the action
+        # These are read by src/config.py if Jira integration is enabled.
+        env:
+          # Required if Jira integration is enabled in your .github/gemini-reviewer.yml:
+          JIRA_URL: ${{ secrets.JIRA_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      # Optional Step 3: Add reaction to the triggering comment (Example)
+      # This uses github-script to provide feedback on the comment itself.
+      # This step is separate from the action but often useful.
+      - name: Add reaction to comment
+        # Run this step even if the previous review step failed
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comment_id = ${{ github.event.comment.id }};
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            // Check the outcome of the step with id 'run_ai_review' if you added that id
+            // For simplicity, just reacting based on job status might be enough
+            const job_status = '${{ job.status }}';
+            let reaction;
+
+            if (job_status === 'success') {
+              reaction = 'rocket'; // Indicate success
+            } else {
+              reaction = 'confused'; // Indicate failure
+            }
+
+            try {
+              await github.rest.reactions.createForIssueComment({
+                owner, repo, comment_id, content: reaction
+              });
+            } catch (error) {
+              console.error(`Failed to add reaction: ${error}`);
+              // Fail gracefully if reaction fails
+            }
