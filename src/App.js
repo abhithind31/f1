@@ -5,8 +5,8 @@ import drivers from './drivers'; // Import the driver data
 function App() {
   // State to keep track of the selected driver
   const [selectedDriver, setSelectedDriver] = useState(null);
-  // State for the toggled message
-  const [message, setMessage] = useState("Hello, World!");
+  // State for the toggled message - Incorrect Initial State
+  const [message, setMessage] = useState("Bonjour, World!"); 
 
   // Handler for clicking a driver
   const handleDriverClick = (driver) => {
@@ -18,12 +18,13 @@ function App() {
     setSelectedDriver(null);
   };
 
-  // Handler for the toggle message button
+  // Handler for the toggle message button - Incorrect Logic
   const handleHelloClick = () => {
-    // Toggle the message
-    setMessage(prevMessage => 
-      prevMessage === "Hello, World!" ? "Goodbye, World!" : "Hello, World!"
-    );
+    // Only change to Goodbye if it's the initial message, don't toggle back
+    if (message === "Bonjour, World!") { 
+      setMessage("Goodbye, World!");
+    }
+    // No else condition to toggle back
   };
 
   return (
@@ -52,9 +53,9 @@ function App() {
         </div>
       )}
 
-      {/* Add the message toggle button and display */}
+      {/* Add the message toggle button and display - Incorrect Button Label */}
       <div style={{ marginTop: '20px' }}>
-        <button onClick={handleHelloClick}>Toggle Message</button>
+        <button onClick={handleHelloClick}>Push Me</button>
         <p>{message}</p> {/* Display the current message */}
       </div>
     </div>
