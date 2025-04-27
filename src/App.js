@@ -5,6 +5,8 @@ import drivers from './drivers'; // Import the driver data
 function App() {
   // State to keep track of the selected driver
   const [selectedDriver, setSelectedDriver] = useState(null);
+  // State for the toggled message
+  const [message, setMessage] = useState("Hello, World!");
 
   // Handler for clicking a driver
   const handleDriverClick = (driver) => {
@@ -14,6 +16,14 @@ function App() {
   // Handler for closing the details view
   const handleCloseDetails = () => {
     setSelectedDriver(null);
+  };
+
+  // Handler for the toggle message button
+  const handleHelloClick = () => {
+    // Toggle the message
+    setMessage(prevMessage => 
+      prevMessage === "Hello, World!" ? "Goodbye, World!" : "Hello, World!"
+    );
   };
 
   return (
@@ -41,6 +51,12 @@ function App() {
           <button onClick={handleCloseDetails}>Close</button> {/* Add Close button */}
         </div>
       )}
+
+      {/* Add the message toggle button and display */}
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={handleHelloClick}>Toggle Message</button>
+        <p>{message}</p> {/* Display the current message */}
+      </div>
     </div>
   );
 }
