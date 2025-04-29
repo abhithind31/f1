@@ -1,0 +1,34 @@
+# .github/gemini-reviewer.yml
+
+# File exclusion patterns (optional, defaults to none if empty or commented out)
+# exclude:
+#   - "**/docs/**"
+#   - "*.lock"
+
+# Custom review instructions (optional, uses defaults if empty or commented out)
+# custom_instructions: |
+#   Focus on critical bugs and security issues only.
+
+# Jira integration settings
+jira:
+  # Enable Jira integration (true/false)
+  # This is the only setting needed to enable the feature,
+  # assuming secrets are configured in the repository.
+  enabled: true
+
+  # --- Optional Jira Settings Below ---
+  # You usually DON'T need to set url, user_email, or api_token here.
+  # These should be provided via repository secrets (JIRA_URL, JIRA_USER_EMAIL, JIRA_API_TOKEN)
+  # and are read from the environment by the action.
+
+  # url: ""
+  # user_email: ""
+
+  # Optional: Restrict detected keys to specific projects
+  # project_keys:
+  #   - "PROJ"
+  #   - "CORE"
+
+  # Optional: Custom regex pattern for finding keys in the PR title prefix.
+  # Defaults to finding keys like ABC-123 ( [A-Z]{2,10}-\d+ )
+  # ticket_id_pattern: "([A-Z]{2,5}-\\d+)" # Example: 2-5 letters followed by digits

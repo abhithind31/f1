@@ -1,0 +1,3 @@
+jira:
+  # Enable Jira integration (true/false)
+  enabled: true # Set to true to activate Jira integration by default

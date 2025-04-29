@@ -8,7 +8,7 @@ on:
 jobs:
   review:
     # Run only if comment is on a PR and starts with the trigger command
-    if: startsWith(github.event.comment.body, '/gemini-review') && github.event.issue.pull_request
+    if: startsWith(github.event.comment.body, '/ai-review') && github.event.issue.pull_request
     runs-on: ubuntu-latest
     # Permissions needed by the action to read code and write comments
     permissions:
@@ -18,15 +18,24 @@ jobs:
 
     steps:
       - name: Run AI Review Bot Action
-        # Replace your-org/ai-review-bot-action with your actual org/repo name
-        # Replace @v1 with the specific tag/branch/commit SHA you want to use
-        uses: abhithind31/cursor@v1
+        # Replace your-org/ai-review-bot with your actual org/repo name
+        # Replace @vX with the specific tag/branch/commit SHA you want to use
+        uses: abhithind31/ai-review-bot@v5 
         with:
-          # Pass the Gemini API key secret to the action
-          gemini-api-key: ${{ secrets.GEMINI_API_KEY }} # Or secrets.YOUR_ORG_SECRET_NAME
+          # Pass AWS secrets to the action
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} # Required if using temporary credentials
+          aws-region: ${{ secrets.AWS_REGION }} # e.g., 'us-east-1' or set as secret
+          # --- JIRA Integration (Enabled by Default) --- 
+          # Provide these secrets unless Jira is disabled in the config file.
+          jira-url: ${{ secrets.JIRA_URL }}
+          jira-user-email: ${{ secrets.JIRA_USER_EMAIL }}
+          jira-api-token: ${{ secrets.JIRA_API_TOKEN }}
+          
+          # Optional: Override the default Bedrock model ID
+          # bedrock-model-id: 'anthropic.claude-v2:1'
           # Optional: Override the default config file path
           # config-path: '.github/my-custom-review-config.yml'
-          # Optional: Override the default Gemini model
-          # gemini-model-name: 'gemini-pro'
-          # Optional: Pass a specific token if needed (defaults to github.token)
+          # Optional: Pass a specific GitHub token if needed (defaults to github.token)
           # github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
