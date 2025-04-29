@@ -17,6 +17,9 @@ jobs:
       issues: read
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Run AI Review Bot Action
         # Replace your-org/ai-review-bot with your actual org/repo name
         # Replace @vX with the specific tag/branch/commit SHA you want to use
